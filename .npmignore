@@ -1,0 +1,8 @@
+node_modules/
+typings/
+test/
+src/
+.travis.yml
+*.log.*
+*.log
+*.tgz
