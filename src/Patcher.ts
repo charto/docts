@@ -66,10 +66,16 @@ function writeSections(sectionList: Section[], markdownPath: string) {
 	fs.writeFileSync(markdownPath, output, { encoding: 'utf8' });
 }
 
+function isIgnored(spec: readts.ClassSpec | readts.SignatureSpec | readts.IdentifierSpec) {
+	return(spec.doc && spec.doc.match(/@ignore/));
+}
+
 function printFunction(spec: readts.FunctionSpec, name: string, output: string[]) {
 	var prefix: string;
 
 	for(var signatureSpec of spec.signatureList) {
+		if(isIgnored(signatureSpec)) continue;
+
 		output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>  ');
 
 		if(signatureSpec.doc) output.push('> > &emsp;' + signatureSpec.doc + '  ');
@@ -87,6 +93,8 @@ function printFunction(spec: readts.FunctionSpec, name: string, output: string[]
 
 function printProperty(spec: readts.IdentifierSpec, name: string, output: string[]) {
 	var prefix: string;
+
+	if(isIgnored(spec)) return;
 
 	if(spec.optional) prefix = '> > **' + spec.name + '**<sub>?</sub>';
 	else prefix = '> > **' + spec.name + '**';
@@ -115,6 +123,8 @@ export function generateDoc(basePath: string) {
 
 	for(var moduleSpec of tree) {
 		for(var classSpec of moduleSpec.classList) {
+			if(isIgnored(classSpec)) continue;
+
 			output.push('>');
 			output.push('> <a name="api-' + classSpec.name + '"></a>');
 			output.push('> ### [`' + classSpec.name + '`](#api-' + classSpec.name + ')');

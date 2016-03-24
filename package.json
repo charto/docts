@@ -1,6 +1,6 @@
 {
   "name": "docts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "README.md API section autogenerator for TypeScript projects",
   "main": "dist/docts.js",
   "typings": "dist/docts.d.ts",
@@ -28,6 +28,6 @@
     "typings": "~0.7.9"
   },
   "dependencies": {
-    "readts": "0.0.2"
+    "readts": "~0.0.3"
   }
 }
