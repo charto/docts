@@ -12,8 +12,11 @@ export class Section {
 }
 
 var hooks: readts.FormatHooks = {
-	class(spec: readts.TypeSpec, hooks: readts.FormatHooks) {
-		return('[' + spec.class.name + '](#api-' + spec.class.name + ')');
+	ref(spec: readts.TypeSpec, hooks: readts.FormatHooks) {
+		var ref = spec.ref;
+
+		if(ref.class) return('[' + ref.class.name + '](#api-' + ref.class.name + ')');
+		else return(ref.name);
 	}
 };
 
@@ -78,13 +81,13 @@ function printFunction(spec: readts.FunctionSpec, name: string, output: string[]
 
 		output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>  ');
 
-		if(signatureSpec.doc) output.push('> > &emsp;' + signatureSpec.doc + '  ');
+		if(signatureSpec.doc) output.push('> > &emsp;<em>' + signatureSpec.doc + '</em>  ');
 
 		for(var paramSpec of signatureSpec.paramList || []) {
 			if(paramSpec.optional) prefix = '> > &emsp;&#x25ab; ' + paramSpec.name + '<sub>?</sub>';
 			else prefix = '> > &emsp;&#x25aa; ' + paramSpec.name;
 
-			var doc = paramSpec.doc ? ' ' + paramSpec.doc : '';
+			var doc = paramSpec.doc ? ' <em>' + paramSpec.doc + '</em>' : '';
 
 			output.push(prefix + ' <sup><code>' + paramSpec.type.format(hooks) + '</code></sup>' + doc + '  ');
 		}
@@ -96,12 +99,12 @@ function printProperty(spec: readts.IdentifierSpec, name: string, output: string
 
 	if(isIgnored(spec)) return;
 
-	if(spec.optional) prefix = '> > **' + spec.name + '**<sub>?</sub>';
-	else prefix = '> > **' + spec.name + '**';
+	if(spec.optional) prefix = '> > **' + name + '**<sub>?</sub>';
+	else prefix = '> > **' + name + '**';
 
 	output.push(prefix + ' <sup><code>' + spec.type.format(hooks) + '</code></sup>  ');
 
-	if(spec.doc) output.push('> > &emsp;' + spec.doc + '  ');
+	if(spec.doc) output.push('> > &emsp;<em>' + spec.doc + '</em>  ');
 }
 
 export function generateDoc(basePath: string) {
@@ -129,16 +132,34 @@ export function generateDoc(basePath: string) {
 			output.push('> <a name="api-' + classSpec.name + '"></a>');
 			output.push('> ### [`' + classSpec.name + '`](#api-' + classSpec.name + ')');
 
-			if(classSpec.doc) output.push('> ' + classSpec.doc + '  ');
+			if(classSpec.doc) output.push('> <em>' + classSpec.doc + '</em>  ');
 
-			if(classSpec.construct) printFunction(classSpec.construct, 'new', output);
+			var methodList = classSpec.methodList || [];
+			var methodOutput: string[] = [];
 
-			for(var methodSpec of classSpec.methodList || []) {
-				printFunction(methodSpec, '.' + methodSpec.name, output);
+			if(classSpec.construct) printFunction(classSpec.construct, 'new', methodOutput);
+
+			for(var methodSpec of methodList) {
+				printFunction(methodSpec, '.' + methodSpec.name, methodOutput);
 			}
 
-			for(var propertySpec of classSpec.propertyList || []) {
-				printProperty(propertySpec, propertySpec.name, output);
+			var propertyList = classSpec.propertyList || [];
+			var propertyOutput: string[] = [];
+
+			for(var propertySpec of propertyList) {
+				printProperty(propertySpec, '.' + propertySpec.name, propertyOutput);
+			}
+
+			if(methodOutput.length) {
+				output.push('>  ');
+				output.push('> Methods:  ');
+				output.push.apply(output, methodOutput);
+			}
+
+			if(propertyOutput.length) {
+				output.push('>  ');
+				output.push('> Properties:  ');
+				output.push.apply(output, propertyOutput);
 			}
 		}
 	}
