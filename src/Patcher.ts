@@ -107,6 +107,42 @@ function printProperty(spec: readts.IdentifierSpec, name: string, output: string
 	if(spec.doc) output.push('> > &emsp;<em>' + spec.doc + '</em>  ');
 }
 
+export function printClass(classSpec: readts.ClassSpec, typePrefix: string, output: string[]) {
+	output.push('>');
+	output.push('> <a name="api-' + classSpec.name + '"></a>');
+	output.push('> ### ' + typePrefix + ' [`' + classSpec.name + '`](#api-' + classSpec.name + ')');
+
+	if(classSpec.doc) output.push('> <em>' + classSpec.doc + '</em>  ');
+
+	var methodList = classSpec.methodList || [];
+	var methodOutput: string[] = [];
+
+	if(classSpec.construct) printFunction(classSpec.construct, 'new', methodOutput);
+
+	for(var methodSpec of methodList) {
+		printFunction(methodSpec, '.' + methodSpec.name, methodOutput);
+	}
+
+	var propertyList = classSpec.propertyList || [];
+	var propertyOutput: string[] = [];
+
+	for(var propertySpec of propertyList) {
+		printProperty(propertySpec, '.' + propertySpec.name, propertyOutput);
+	}
+
+	if(methodOutput.length) {
+		output.push('>  ');
+		output.push('> Methods:  ');
+		output.push.apply(output, methodOutput);
+	}
+
+	if(propertyOutput.length) {
+		output.push('>  ');
+		output.push('> Properties:  ');
+		output.push.apply(output, propertyOutput);
+	}
+}
+
 export function generateDoc(basePath: string) {
 	var packagePath = path.resolve(basePath, 'package.json');
 	var tsconfigPath = path.resolve(basePath, 'tsconfig.json');
@@ -125,42 +161,14 @@ export function generateDoc(basePath: string) {
 	output.push('');
 
 	for(var moduleSpec of tree) {
+		for(var classSpec of moduleSpec.interfaceList) {
+			if(isIgnored(classSpec)) continue;
+			printClass(classSpec, 'Interface', output);
+		}
+
 		for(var classSpec of moduleSpec.classList) {
 			if(isIgnored(classSpec)) continue;
-
-			output.push('>');
-			output.push('> <a name="api-' + classSpec.name + '"></a>');
-			output.push('> ### [`' + classSpec.name + '`](#api-' + classSpec.name + ')');
-
-			if(classSpec.doc) output.push('> <em>' + classSpec.doc + '</em>  ');
-
-			var methodList = classSpec.methodList || [];
-			var methodOutput: string[] = [];
-
-			if(classSpec.construct) printFunction(classSpec.construct, 'new', methodOutput);
-
-			for(var methodSpec of methodList) {
-				printFunction(methodSpec, '.' + methodSpec.name, methodOutput);
-			}
-
-			var propertyList = classSpec.propertyList || [];
-			var propertyOutput: string[] = [];
-
-			for(var propertySpec of propertyList) {
-				printProperty(propertySpec, '.' + propertySpec.name, propertyOutput);
-			}
-
-			if(methodOutput.length) {
-				output.push('>  ');
-				output.push('> Methods:  ');
-				output.push.apply(output, methodOutput);
-			}
-
-			if(propertyOutput.length) {
-				output.push('>  ');
-				output.push('> Properties:  ');
-				output.push.apply(output, propertyOutput);
-			}
+			printClass(classSpec, 'Class', output);
 		}
 	}
 
