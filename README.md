@@ -4,6 +4,39 @@ docts
 [![build status](https://travis-ci.org/charto/docts.svg?branch=master)](http://travis-ci.org/charto/docts)
 [![npm version](https://img.shields.io/npm/v/docts.svg)](https://www.npmjs.com/package/docts)
 
+This is a command-line tool to generate API documentation for TypeScript projects
+based on information about types and exported declarations extracted using [readts](https://github.com/charto/readts).
+Run `docts` inside your package and it parses the `.d.ts` files referenced from the `typings` key of your `package.json`.
+Then it replaces any section titled `API` in your `README.md` file with new automatically generated content.
+For an example of its output, see the [API](#api) section below.
+
+Any additional TypeScript configuration should be defined in `tsconfig.json` in the root if your package.
+
+Usage
+-----
+
+Start by making a backup of your `README.md`.
+
+Then install:
+
+```sh
+npm install --save docts
+```
+
+Make sure your `package.json` has a `typings` section and add in the `scripts` section:
+
+```json
+  "scripts": {
+    "docts": "docts"
+  }
+```
+
+Finally run:
+
+```sh
+npm run docts
+```
+
 API
 ===
 
