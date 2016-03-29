@@ -9,6 +9,7 @@
   },
   "scripts": {
     "tsc": "tsc",
+    "docts": "node docts-cli.js",
     "typings": "typings",
     "prepublish": "typings install && tsc",
     "test": "npm link docts && docts --help"

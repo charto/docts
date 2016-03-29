@@ -5,11 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readts from 'readts';
 
-export class Section {
-	header: string[] = [];
-	content: string[] = [];
-	name: string;
-}
+import {Section, Markdown} from './Markdown';
 
 var hooks: readts.FormatHooks = {
 	ref(spec: readts.TypeSpec, hooks: readts.FormatHooks) {
@@ -19,55 +15,6 @@ var hooks: readts.FormatHooks = {
 		else return(ref.name);
 	}
 };
-
-export function readSections(markdownPath: string) {
-	var lineList = fs.readFileSync(markdownPath, { encoding: 'utf8' }).split(/\r?\n/);
-	var sectionList: Section[] = [];
-	var section = new Section();
-	var prev: string = null;
-
-	for(var line of lineList) {
-		if(line.match(/^ *[-=]{2,} *$/)) {
-			sectionList.push(section);
-			section = new Section();
-
-			if(prev) {
-				section.header.push(prev);
-				section.header.push(line);
-				section.name = prev.trim().toLowerCase();
-			}
-			line = null;
-		} else {
-			if(prev || prev === '') section.content.push(prev);
-
-			var match = line.match(/^ *#{1,6} *([^ #]+)/);
-
-			if(match) {
-				sectionList.push(section);
-				section = new Section();
-
-				section.header.push(line);
-				section.name = match[1].trim().toLowerCase();
-				line = null;
-			}
-		}
-
-		prev = line;
-	}
-
-	if(prev || prev === '') section.content.push(prev);
-	sectionList.push(section);
-
-	return(sectionList);
-}
-
-function writeSections(sectionList: Section[], markdownPath: string) {
-	var output = Array.prototype.concat.apply([], sectionList.map(
-		(section: Section) => section.header.concat(section.content)
-	)).join('\n');
-
-	fs.writeFileSync(markdownPath, output, { encoding: 'utf8' });
-}
 
 function isIgnored(spec: readts.ClassSpec | readts.SignatureSpec | readts.IdentifierSpec) {
 	return(spec.doc && spec.doc.match(/@ignore/));
@@ -178,9 +125,9 @@ export function generateDoc(basePath: string) {
 }
 
 export function patchReadme(basePath: string) {
-	var readmePath = path.resolve(basePath, 'README.md');
+	var markdown = new Markdown(path.resolve(basePath, 'README.md'));
 
-	var sectionList = readSections(readmePath);
+	var sectionList = markdown.readSections();
 	var sectionTbl: { [name: string]: Section } = {};
 
 	for(var section of sectionList) sectionTbl[section.name] = section;
@@ -189,6 +136,6 @@ export function patchReadme(basePath: string) {
 
 	if(apiSection) {
 		apiSection.content = generateDoc(basePath);
-		writeSections(sectionList, readmePath);
+		markdown.writeSections(sectionList);
 	}
 }

@@ -12,6 +12,7 @@
 	"files": [
 		"typings/main.d.ts",
 
+		"src/docts.ts",
 		"src/cli.ts"
 	]
 }
