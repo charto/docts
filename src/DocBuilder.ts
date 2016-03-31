@@ -32,7 +32,11 @@ export class DocBuilder {
 		this.output.push('> <a name="api-' + name + '"></a>');
 		this.output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')');
 
-		if(doc) this.output.push('> <em>' + doc + '</em>  ');
+		if(doc) {
+			for(var line of doc.split(/\r?\n/)) {
+				this.output.push('> <em>' + line + '</em>  ');
+			}
+		}
 	}
 
 	private printFunction(spec: readts.FunctionSpec, name: string, depth: number, output: string[]) {
@@ -50,7 +54,9 @@ export class DocBuilder {
 			output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>  ');
 
 			if(signatureSpec.doc && !docPrinted) {
-				output.push('> > &emsp;<em>' + signatureSpec.doc + '</em>  ');
+				for(var line of signatureSpec.doc.split(/\r?\n/)) {
+					this.output.push('> > &emsp;<em>' + line + '</em>  ');
+				}
 			}
 
 			for(var paramSpec of signatureSpec.paramList || []) {
@@ -76,7 +82,11 @@ export class DocBuilder {
 
 		output.push(prefix + ' <sup><code>' + spec.type.format(hooks) + '</code></sup>  ');
 
-		if(spec.doc) output.push('> > &emsp;<em>' + spec.doc + '</em>  ');
+		if(spec.doc) {
+			for(var line of spec.doc.split(/\r?\n/)) {
+				output.push('> > &emsp;<em>' + line + '</em>  ');
+			}
+		}
 	}
 
 	/** Output documentation for a single class. */
