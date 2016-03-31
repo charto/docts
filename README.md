@@ -20,7 +20,7 @@ Start by making a backup of your `README.md`.
 Then install:
 
 ```sh
-npm install --save docts
+npm install --save-dev docts
 ```
 
 Make sure your `package.json` has a `typings` section and add in the `scripts` section:
@@ -64,6 +64,19 @@ API
 >  
 > Properties:  
 > > **.path** <sup><code>string</code></sup>  
+>
+> <a name="api-generateDoc"></a>
+> ### Function [`generateDoc`](#api-generateDoc)
+> <em>Generate API documentation for package given a path to its root.
+Returns an array of text split by line breaks.</em>  
+> > **generateDoc( )** <sup>&rArr; <code>string[]</code></sup>  
+> > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
+>
+> <a name="api-patchReadme"></a>
+> ### Function [`patchReadme`](#api-patchReadme)
+> <em>Patch section titled API of README.md file in given directory.</em>  
+> > **patchReadme( )** <sup>&rArr; <code>void</code></sup>  
+> > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 
 License
 =======

@@ -8,7 +8,7 @@ import * as readts from 'readts';
 import {Section, Markdown} from './Markdown';
 
 var hooks: readts.FormatHooks = {
-	ref(spec: readts.TypeSpec, hooks: readts.FormatHooks) {
+	ref: (spec: readts.TypeSpec, hooks: readts.FormatHooks) => {
 		var ref = spec.ref;
 
 		if(ref.class) return('[' + ref.class.name + '](#api-' + ref.class.name + ')');
@@ -20,15 +20,31 @@ function isIgnored(spec: readts.ClassSpec | readts.SignatureSpec | readts.Identi
 	return(spec.doc && spec.doc.match(/@ignore/));
 }
 
-function printFunction(spec: readts.FunctionSpec, name: string, output: string[]) {
+function printTitle(name: string, typePrefix: string, doc: string, output: string[]) {
+	output.push('>');
+	output.push('> <a name="api-' + name + '"></a>');
+	output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')');
+
+	if(doc) output.push('> <em>' + doc + '</em>  ');
+}
+
+function printFunction(spec: readts.FunctionSpec, name: string, depth: number, output: string[]) {
 	var prefix: string;
+	var docPrinted = false;
+
+	if(depth == 0) {
+		printTitle(spec.name, 'Function', spec.signatureList[0].doc, output);
+		docPrinted = true;
+	}
 
 	for(var signatureSpec of spec.signatureList) {
 		if(isIgnored(signatureSpec)) continue;
 
 		output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>  ');
 
-		if(signatureSpec.doc) output.push('> > &emsp;<em>' + signatureSpec.doc + '</em>  ');
+		if(signatureSpec.doc && !docPrinted) {
+			output.push('> > &emsp;<em>' + signatureSpec.doc + '</em>  ');
+		}
 
 		for(var paramSpec of signatureSpec.paramList || []) {
 			if(paramSpec.optional) prefix = '> > &emsp;&#x25ab; ' + paramSpec.name + '<sub>?</sub>';
@@ -38,6 +54,8 @@ function printFunction(spec: readts.FunctionSpec, name: string, output: string[]
 
 			output.push(prefix + ' <sup><code>' + paramSpec.type.format(hooks) + '</code></sup>' + doc + '  ');
 		}
+
+		docPrinted = false;
 	}
 }
 
@@ -54,23 +72,21 @@ function printProperty(spec: readts.IdentifierSpec, name: string, output: string
 	if(spec.doc) output.push('> > &emsp;<em>' + spec.doc + '</em>  ');
 }
 
-export function printClass(classSpec: readts.ClassSpec, typePrefix: string, output: string[]) {
-	output.push('>');
-	output.push('> <a name="api-' + classSpec.name + '"></a>');
-	output.push('> ### ' + typePrefix + ' [`' + classSpec.name + '`](#api-' + classSpec.name + ')');
+/** Output documentation for a single class. */
 
-	if(classSpec.doc) output.push('> <em>' + classSpec.doc + '</em>  ');
+function printClass(spec: readts.ClassSpec, typePrefix: string, output: string[]) {
+	printTitle(spec.name, typePrefix, spec.doc, output);
 
-	var methodList = classSpec.methodList || [];
+	var methodList = spec.methodList || [];
 	var methodOutput: string[] = [];
 
-	if(classSpec.construct) printFunction(classSpec.construct, 'new', methodOutput);
+	if(spec.construct) printFunction(spec.construct, 'new', 1, methodOutput);
 
 	for(var methodSpec of methodList) {
-		printFunction(methodSpec, '.' + methodSpec.name, methodOutput);
+		printFunction(methodSpec, '.' + methodSpec.name, 1, methodOutput);
 	}
 
-	var propertyList = classSpec.propertyList || [];
+	var propertyList = spec.propertyList || [];
 	var propertyOutput: string[] = [];
 
 	for(var propertySpec of propertyList) {
@@ -89,6 +105,9 @@ export function printClass(classSpec: readts.ClassSpec, typePrefix: string, outp
 		output.push.apply(output, propertyOutput);
 	}
 }
+
+/** Generate API documentation for package given a path to its root.
+  * Returns an array of text split by line breaks. */
 
 export function generateDoc(basePath: string) {
 	var packagePath = path.resolve(basePath, 'package.json');
@@ -117,12 +136,18 @@ export function generateDoc(basePath: string) {
 			if(isIgnored(classSpec)) continue;
 			printClass(classSpec, 'Class', output);
 		}
+
+		for(var functionSpec of moduleSpec.functionList) {
+			printFunction(functionSpec, functionSpec.name, 0, output);
+		}
 	}
 
 	output.push('');
 
 	return(output);
 }
+
+/** Patch section titled API of README.md file in given directory. */
 
 export function patchReadme(basePath: string) {
 	var markdown = new Markdown(path.resolve(basePath, 'README.md'));
