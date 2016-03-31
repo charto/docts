@@ -43,17 +43,23 @@ API
 >
 > <a name="api-Section"></a>
 > ### Class [`Section`](#api-Section)
+> <em>Represents a section in a Markdown file.</em>  
 >  
 > Methods:  
 > > **new( )** <sup>&rArr; <code>[Section](#api-Section)</code></sup>  
 >  
 > Properties:  
 > > **.header** <sup><code>string[]</code></sup>  
+> > &emsp;<em>Heading and its markup split by newlines.
+Heading is a line beginning with # or followed by another line full of - or =.</em>  
 > > **.content** <sup><code>string[]</code></sup>  
+> > &emsp;<em>Section content split by newlines.</em>  
 > > **.name** <sup><code>string</code></sup>  
+> > &emsp;<em>Heading with markup stripped.</em>  
 >
 > <a name="api-Markdown"></a>
 > ### Class [`Markdown`](#api-Markdown)
+> <em>Represents a Markdown file.</em>  
 >  
 > Methods:  
 > > **new( )** <sup>&rArr; <code>[Markdown](#api-Markdown)</code></sup>  
@@ -65,12 +71,16 @@ API
 > Properties:  
 > > **.path** <sup><code>string</code></sup>  
 >
-> <a name="api-generateDoc"></a>
-> ### Function [`generateDoc`](#api-generateDoc)
-> <em>Generate API documentation for package given a path to its root.
-Returns an array of text split by line breaks.</em>  
-> > **generateDoc( )** <sup>&rArr; <code>string[]</code></sup>  
+> <a name="api-DocBuilder"></a>
+> ### Class [`DocBuilder`](#api-DocBuilder)
+> <em>TypeScript project Markdown documentation builder.</em>  
+>  
+> Methods:  
+> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup>  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
+> > **.build( )** <sup>&rArr; <code>string[]</code></sup>  
+> > &emsp;<em>Generate API documentation for the package.
+Returns an array of text split by line breaks.</em>  
 >
 > <a name="api-patchReadme"></a>
 > ### Function [`patchReadme`](#api-patchReadme)

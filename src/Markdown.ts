@@ -2,14 +2,20 @@
 // Released under the MIT license, see LICENSE.
 
 import * as fs from 'fs';
-import * as path from 'path';
-import * as readts from 'readts';
+
+/** Represents a section in a Markdown file. */
 
 export class Section {
+	/** Heading and its markup split by newlines.
+	  * Heading is a line beginning with # or followed by another line full of - or =. */
 	header: string[] = [];
+	/** Section content split by newlines. */
 	content: string[] = [];
+	/** Heading with markup stripped. */
 	name: string;
 }
+
+/** Represents a Markdown file. */
 
 export class Markdown {
 	constructor(markdownPath: string) {

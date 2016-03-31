@@ -2,4 +2,5 @@
 // Released under the MIT license, see LICENSE.
 
 export {Section, Markdown} from './Markdown';
-export {generateDoc, patchReadme} from './Patcher';
+export {DocBuilder} from './DocBuilder';
+export {patchReadme} from './Patcher';
