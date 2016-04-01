@@ -10,6 +10,12 @@ Run `docts` inside your package and it parses the `.d.ts` files referenced from 
 Then it replaces any section titled `API` in your `README.md` file with new automatically generated content.
 For an example of its output, see the [API](#api) section below.
 
+If your package is a Git working tree and the `repository` field in `package.json` points to a Github URL,
+links to relevant parts of the code published on Github are added next to functions, classes and methods.
+Each link looks like `<>` or :octocat: and includes the hash of the latest commit which changed the relevant file.
+If that file is dirty in the working tree, the link points to whatever is on the current branch instead.
+This minimizes changes to the links while trying to keep them pointed to the correct location in latest code.
+
 Any additional TypeScript configuration should be defined in `tsconfig.json` in the root if your package.
 
 Usage
@@ -42,11 +48,11 @@ API
 
 >
 > <a name="api-Section"></a>
-> ### Class [`Section`](#api-Section)
+> ### Class [`Section`](#api-Section) [:octocat:](#)
 > <em>Represents a section in a Markdown file.</em>  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[Section](#api-Section)</code></sup>  
+> > **new( )** <sup>&rArr; <code>[Section](#api-Section)</code></sup> [`<>`](#)  
 >  
 > Properties:  
 > > **.header** <sup><code>string[]</code></sup>  
@@ -58,35 +64,35 @@ API
 > > &emsp;<em>Heading with markup stripped.</em>  
 >
 > <a name="api-Markdown"></a>
-> ### Class [`Markdown`](#api-Markdown)
+> ### Class [`Markdown`](#api-Markdown) [:octocat:](#)
 > <em>Represents a Markdown file.</em>  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[Markdown](#api-Markdown)</code></sup>  
+> > **new( )** <sup>&rArr; <code>[Markdown](#api-Markdown)</code></sup> [`<>`](#)  
 > > &emsp;&#x25aa; markdownPath <sup><code>string</code></sup>  
-> > **.readSections( )** <sup>&rArr; <code>[Section](#api-Section)[]</code></sup>  
-> > **.writeSections( )** <sup>&rArr; <code>any</code></sup>  
+> > **.readSections( )** <sup>&rArr; <code>[Section](#api-Section)[]</code></sup> [`<>`](#)  
+> > **.writeSections( )** <sup>&rArr; <code>any</code></sup> [`<>`](#)  
 > > &emsp;&#x25aa; sectionList <sup><code>[Section](#api-Section)[]</code></sup>  
 >  
 > Properties:  
 > > **.path** <sup><code>string</code></sup>  
 >
 > <a name="api-DocBuilder"></a>
-> ### Class [`DocBuilder`](#api-DocBuilder)
+> ### Class [`DocBuilder`](#api-DocBuilder) [:octocat:](#)
 > <em>TypeScript project Markdown documentation builder.</em>  
 > > &emsp;<em>Generate API documentation for the package.</em>  
 > > &emsp;<em>Returns promise resolving to an array of text split by line breaks.</em>  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup>  
+> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](#)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > **.build( )** <sup>&rArr; <code>any</code></sup>  
+> > **.build( )** <sup>&rArr; <code>any</code></sup> [`<>`](#)  
 
 >
 > <a name="api-patchReadme"></a>
-> ### Function [`patchReadme`](#api-patchReadme)
+> ### Function [`patchReadme`](#api-patchReadme) [:octocat:](#)
 > <em>Patch section titled API of README.md file in given directory.</em>  
-> > **patchReadme( )** <sup>&rArr; <code>void</code></sup>  
+> > **patchReadme( )** <sup>&rArr; <code>void</code></sup> [`<>`](#)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 License
 =======

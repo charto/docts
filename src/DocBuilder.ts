@@ -5,6 +5,8 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as readts from 'readts';
 
+import {Git, LogEntry} from './Git';
+
 var hooks: readts.FormatHooks = {
 	ref: (spec: readts.TypeSpec, hooks: readts.FormatHooks) => {
 		var ref = spec.ref;
@@ -26,12 +28,15 @@ export class DocBuilder {
 		this.tsconfigPath = path.resolve(basePath, 'tsconfig.json');
 		var pkgJson = require(packagePath);
 		this.dtsPath = path.resolve(basePath, pkgJson.typings);
+		var gitPath = path.resolve(basePath, '.git');
+
+		this.git = new Git(gitPath);
 	}
 
 	private printTitle(name: string, typePrefix: string, doc: string) {
 		this.output.push('>');
 		this.output.push('> <a name="api-' + name + '"></a>');
-		this.output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')');
+		this.output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ') [:octocat:](#)');
 
 		if(doc) {
 			for(var line of doc.split(/\r?\n/)) {
@@ -52,7 +57,7 @@ export class DocBuilder {
 		for(var signatureSpec of spec.signatureList) {
 			if(isIgnored(signatureSpec)) continue;
 
-			output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>  ');
+			output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup> [`<>`](#)  ');
 
 			if(signatureSpec.doc && !docPrinted) {
 				for(var line of signatureSpec.doc.split(/\r?\n/)) {
@@ -124,6 +129,44 @@ export class DocBuilder {
 		}
 	}
 
+	private init() {
+		if(this.git) {
+			return(
+				this.git.getWorkingHead().then((hash: string) =>
+					this.gitHead = hash
+				).catch((err: any) => true)
+			);
+		}
+
+		return(Promise.resolve(true));
+	}
+
+	private generate(tree: readts.ModuleSpec[]) {
+		this.git.getLog(this.gitHead, {
+			path: 'package.json',
+			count: 1
+		}).then((log: LogEntry[]) => {
+			if(log) console.log(log[0].hash.substr(0, 7));
+//			console.log(log.map((entry: LogEntry) => new Date(entry.author.date.seconds * 1000).toISOString()));
+		});
+
+		return(
+			Promise.each(tree, (moduleSpec: readts.ModuleSpec) => {
+				Promise.each(moduleSpec.interfaceList, (interfaceSpec: readts.ClassSpec) =>
+					isIgnored(interfaceSpec) || this.printClass(interfaceSpec, 'Interface')
+				).then(() =>
+					Promise.each(moduleSpec.classList, (classSpec: readts.ClassSpec) =>
+						isIgnored(classSpec) || this.printClass(classSpec, 'Class')
+					)
+				).then(() =>
+					Promise.each(moduleSpec.functionList, (functionSpec: readts.FunctionSpec) =>
+						this.printFunction(functionSpec, functionSpec.name, 0, this.output)
+					)
+				)
+			})
+		);
+	}
+
 	/** Generate API documentation for the package.
 	  * Returns promise resolving to an array of text split by line breaks. */
 
@@ -134,29 +177,24 @@ export class DocBuilder {
 		config.options.noEmit = true;
 		config.fileNames = [ this.dtsPath ];
 
-		var tree = parser.parse(config);
-
 		this.output = [''];
 
-		return(Promise.each(tree, (moduleSpec: readts.ModuleSpec) => {
-			Promise.each(moduleSpec.interfaceList, (interfaceSpec: readts.ClassSpec) =>
-				isIgnored(interfaceSpec) || this.printClass(interfaceSpec, 'Interface')
+		return(
+			this.init().then(() =>
+				this.generate(parser.parse(config))
 			).then(() =>
-				Promise.each(moduleSpec.classList, (classSpec: readts.ClassSpec) =>
-					isIgnored(classSpec) || this.printClass(classSpec, 'Class')
-				)
-			).then(() =>
-				Promise.each(moduleSpec.functionList, (functionSpec: readts.FunctionSpec) =>
-					this.printFunction(functionSpec, functionSpec.name, 0, this.output)
-				)
+				this.output.push('') && this.output
 			)
-		}).then(() => this.output.push('') && this.output));
+		);
 	}
 
 	/** Path to tsconfig.json. */
 	private tsconfigPath: string;
 	/** Path to main .d.ts exports file. */
 	private dtsPath: string;
+
+	private git: Git;
+	private gitHead: string;
 
 	/** Generated output split by newlines. */
 	private output: string[];
