@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as readts from 'readts';
 
-import {Git, LogEntry} from './Git';
+import {Git, CommitInfo} from 'ts-git';
 
 var hooks: readts.FormatHooks = {
 	ref: (spec: readts.TypeSpec, hooks: readts.FormatHooks) => {
@@ -28,21 +28,22 @@ export class DocBuilder {
 		this.tsconfigPath = path.resolve(basePath, 'tsconfig.json');
 		var pkgJson = require(packagePath);
 		this.dtsPath = path.resolve(basePath, pkgJson.typings);
-		var gitPath = path.resolve(basePath, '.git');
 
-		this.git = new Git(gitPath);
+		this.git = new Git(basePath);
 	}
 
 	private printTitle(name: string, typePrefix: string, doc: string) {
 		this.output.push('>');
 		this.output.push('> <a name="api-' + name + '"></a>');
-		this.output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ') [:octocat:](#)');
+		this.output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')');
 
 		if(doc) {
 			for(var line of doc.split(/\r?\n/)) {
 				this.output.push('> <em>' + line + '</em>  ');
 			}
 		}
+
+		this.output.push('> Source code: [`<>`](#)  ');
 	}
 
 	private printFunction(spec: readts.FunctionSpec, name: string, depth: number, output: string[]) {
@@ -145,8 +146,9 @@ export class DocBuilder {
 		this.git.getLog(this.gitHead, {
 			path: 'package.json',
 			count: 1
-		}).then((log: LogEntry[]) => {
+		}).then((log: CommitInfo[]) => {
 			if(log) console.log(log[0].hash.substr(0, 7));
+this.git.isDirty('package.json').then((dirty: boolean) => console.log(dirty));
 //			console.log(log.map((entry: LogEntry) => new Date(entry.author.date.seconds * 1000).toISOString()));
 		});
 
