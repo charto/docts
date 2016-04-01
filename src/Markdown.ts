@@ -23,6 +23,8 @@ export class Markdown {
 		this.path = markdownPath;
 	}
 
+	/** Read the file and split each heading into a separate section. */
+
 	readSections() {
 		var lineList = fs.readFileSync(this.path, { encoding: 'utf8' }).split(/\r?\n/);
 		var sectionList: Section[] = [];
@@ -63,6 +65,8 @@ export class Markdown {
 
 		return(sectionList);
 	}
+
+	/** Replace file contents with a new list of sections. */
 
 	writeSections(sectionList: Section[]): Promise<void> {
 		var output = Array.prototype.concat.apply([], sectionList.map(
