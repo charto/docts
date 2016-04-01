@@ -65,7 +65,7 @@ API
 > > **new( )** <sup>&rArr; <code>[Markdown](#api-Markdown)</code></sup>  
 > > &emsp;&#x25aa; markdownPath <sup><code>string</code></sup>  
 > > **.readSections( )** <sup>&rArr; <code>[Section](#api-Section)[]</code></sup>  
-> > **.writeSections( )** <sup>&rArr; <code>void</code></sup>  
+> > **.writeSections( )** <sup>&rArr; <code>any</code></sup>  
 > > &emsp;&#x25aa; sectionList <sup><code>[Section](#api-Section)[]</code></sup>  
 >  
 > Properties:  
@@ -75,19 +75,19 @@ API
 > ### Class [`DocBuilder`](#api-DocBuilder)
 > <em>TypeScript project Markdown documentation builder.</em>  
 > > &emsp;<em>Generate API documentation for the package.</em>  
-> > &emsp;<em>Returns an array of text split by line breaks.</em>  
+> > &emsp;<em>Returns promise resolving to an array of text split by line breaks.</em>  
 >  
 > Methods:  
 > > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup>  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > **.build( )** <sup>&rArr; <code>string[]</code></sup>  
+> > **.build( )** <sup>&rArr; <code>any</code></sup>  
+
 >
 > <a name="api-patchReadme"></a>
 > ### Function [`patchReadme`](#api-patchReadme)
 > <em>Patch section titled API of README.md file in given directory.</em>  
 > > **patchReadme( )** <sup>&rArr; <code>void</code></sup>  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-
 License
 =======
 

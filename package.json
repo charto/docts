@@ -29,6 +29,7 @@
     "typings": "~0.7.9"
   },
   "dependencies": {
+    "bluebird": "^3.3.4",
     "readts": "~0.0.3"
   }
 }

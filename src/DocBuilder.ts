@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as path from 'path';
+import * as Promise from 'bluebird';
 import * as readts from 'readts';
 
 var hooks: readts.FormatHooks = {
@@ -124,7 +125,7 @@ export class DocBuilder {
 	}
 
 	/** Generate API documentation for the package.
-	  * Returns an array of text split by line breaks. */
+	  * Returns promise resolving to an array of text split by line breaks. */
 
 	build() {
 		var parser = new readts.Parser();
@@ -137,25 +138,19 @@ export class DocBuilder {
 
 		this.output = [''];
 
-		for(var moduleSpec of tree) {
-			for(var classSpec of moduleSpec.interfaceList) {
-				if(isIgnored(classSpec)) continue;
-				this.printClass(classSpec, 'Interface');
-			}
-
-			for(var classSpec of moduleSpec.classList) {
-				if(isIgnored(classSpec)) continue;
-				this.printClass(classSpec, 'Class');
-			}
-
-			for(var functionSpec of moduleSpec.functionList) {
-				this.printFunction(functionSpec, functionSpec.name, 0, this.output);
-			}
-		}
-
-		this.output.push('');
-
-		return(this.output);
+		return(Promise.each(tree, (moduleSpec: readts.ModuleSpec) => {
+			Promise.each(moduleSpec.interfaceList, (interfaceSpec: readts.ClassSpec) =>
+				isIgnored(interfaceSpec) || this.printClass(interfaceSpec, 'Interface')
+			).then(() =>
+				Promise.each(moduleSpec.classList, (classSpec: readts.ClassSpec) =>
+					isIgnored(classSpec) || this.printClass(classSpec, 'Class')
+				)
+			).then(() =>
+				Promise.each(moduleSpec.functionList, (functionSpec: readts.FunctionSpec) =>
+					this.printFunction(functionSpec, functionSpec.name, 0, this.output)
+				)
+			)
+		}).then(() => this.output.push('') && this.output));
 	}
 
 	/** Path to tsconfig.json. */

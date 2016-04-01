@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as fs from 'fs';
+import * as Promise from 'bluebird';
 
 /** Represents a section in a Markdown file. */
 
@@ -63,12 +64,14 @@ export class Markdown {
 		return(sectionList);
 	}
 
-	writeSections(sectionList: Section[]) {
+	writeSections(sectionList: Section[]): Promise<void> {
 		var output = Array.prototype.concat.apply([], sectionList.map(
 			(section: Section) => section.header.concat(section.content)
 		)).join('\n');
 
-		fs.writeFileSync(this.path, output, { encoding: 'utf8' });
+		var writeFile = Promise.promisify(fs.writeFile as (path: string, data: string, options: any, cb: any) => void);
+
+		return(writeFile(this.path, output, { encoding: 'utf8' }) as Promise<any>);
 	}
 
 	path: string;

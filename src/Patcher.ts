@@ -19,7 +19,9 @@ export function patchReadme(basePath: string) {
 	var apiSection = sectionTbl['api'];
 
 	if(apiSection) {
-		apiSection.content = new DocBuilder(basePath).build();
-		markdown.writeSections(sectionList);
+		new DocBuilder(basePath).build().then((content: string[]) => {
+			apiSection.content = content;
+			return(markdown.writeSections(sectionList));
+		});
 	}
 }
