@@ -42,62 +42,60 @@ export class DocBuilder {
 	}
 
 	private formatPos(pos: readts.SourcePos) {
-		if(!pos) return('');
-		return(' [`<>`](#L' + pos.firstLine + ')');
+		if(!pos) return(Promise.resolve(''));
+		return(Promise.resolve(' [`<>`](#L' + pos.firstLine + ')'));
 	}
 
 	private printTitle(name: string, typePrefix: string, doc: string, pos: readts.SourcePos) {
-		var output: string[] = [];
+		return(this.formatPos(pos).then((posLink: string) => {
+			var output = [
+				'>',
+				'> <a name="api-' + name + '"></a>',
+				'> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')'
+			];
 
-		output.push('>');
-		output.push('> <a name="api-' + name + '"></a>');
-		output.push('> ### ' + typePrefix + ' [`' + name + '`](#api-' + name + ')');
-
-		if(doc) {
-			for(var line of doc.split(/\r?\n/)) {
-				output.push('> <em>' + line + '</em>  ');
-			}
-		}
-
-		output.push('> Source code:' + this.formatPos(pos) + '  ');
-
-		return(output);
-	}
-
-	private printFunction(spec: readts.FunctionSpec, name: string, depth: number) {
-		var output: string[] = [];
-		var prefix: string;
-		var docPrinted = false;
-
-		if(depth == 0) {
-			output = this.printTitle(spec.name, 'Function', spec.signatureList[0].doc, spec.pos);
-			docPrinted = true;
-		}
-
-		for(var signatureSpec of spec.signatureList) {
-			if(isIgnored(signatureSpec)) continue;
-
-			output.push('> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>' + this.formatPos(signatureSpec.pos) + '  ');
-
-			if(signatureSpec.doc && !docPrinted) {
-				for(var line of signatureSpec.doc.split(/\r?\n/)) {
-					output.push('> > &emsp;<em>' + line + '</em>  ');
+			if(doc) {
+				for(var line of doc.split(/\r?\n/)) {
+					output.push('> <em>' + line + '</em>  ');
 				}
 			}
 
-			for(var paramSpec of signatureSpec.paramList || []) {
-				if(paramSpec.optional) prefix = '> > &emsp;&#x25ab; ' + paramSpec.name + '<sub>?</sub>';
-				else prefix = '> > &emsp;&#x25aa; ' + paramSpec.name;
+			output.push('> Source code:' + posLink + '  ');
 
-				var doc = paramSpec.doc ? ' <em>' + paramSpec.doc + '</em>' : '';
+			return(output);
+		}));
+	}
 
-				output.push(prefix + ' <sup><code>' + paramSpec.type.format(hooks) + '</code></sup>' + doc + '  ');
-			}
+	private printFunction(spec: readts.FunctionSpec, name: string, depth: number) {
+		return(Promise.all([
+			depth == 0 ? this.printTitle(spec.name, 'Function', spec.signatureList[0].doc, spec.signatureList[0].pos) : [],
 
-			docPrinted = false;
-		}
+			Promise.map(spec.signatureList, (signatureSpec: readts.SignatureSpec, index: number) =>
+				isIgnored(signatureSpec) ? [] : this.formatPos(signatureSpec.pos).then((posLink: string) => {
+					var output = [
+						'> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>' + posLink + '  '
+					];
+					var prefix: string;
 
-		return(output);
+					if(signatureSpec.doc && (depth > 0 || index > 0)) {
+						for(var line of signatureSpec.doc.split(/\r?\n/)) {
+							output.push('> > &emsp;<em>' + line + '</em>  ');
+						}
+					}
+
+					for(var paramSpec of signatureSpec.paramList || []) {
+						if(paramSpec.optional) prefix = '> > &emsp;&#x25ab; ' + paramSpec.name + '<sub>?</sub>';
+						else prefix = '> > &emsp;&#x25aa; ' + paramSpec.name;
+
+						var doc = paramSpec.doc ? ' <em>' + paramSpec.doc + '</em>' : '';
+
+						output.push(prefix + ' <sup><code>' + paramSpec.type.format(hooks) + '</code></sup>' + doc + '  ');
+					}
+
+					return(output);
+				})
+			).then(flatten)
+		]).then(flatten));
 	}
 
 	private printProperty(spec: readts.IdentifierSpec, name: string) {
@@ -123,37 +121,31 @@ export class DocBuilder {
 	/** Output documentation for a single class. */
 
 	private printClass(spec: readts.ClassSpec, typePrefix: string) {
-		var output = this.printTitle(spec.name, typePrefix, spec.doc, spec.pos);
-
 		var methodList = spec.methodList || [];
-		var methodOutput: string[][] = [];
 
-		if(spec.construct) methodOutput.push(this.printFunction(spec.construct, 'new', 1));
+		if(spec.construct && spec.construct.signatureList.length && spec.construct.signatureList[0].pos) methodList.unshift(spec.construct);
 
-		for(var methodSpec of methodList) {
-			methodOutput.push(this.printFunction(methodSpec, '.' + methodSpec.name, 1));
-		}
+		return(Promise.all([
+			this.printTitle(spec.name, typePrefix, spec.doc, spec.pos),
 
-		var propertyList = spec.propertyList || [];
-		var propertyOutput: string[][] = [];
+			Promise.map(spec.methodList || [], (methodSpec: readts.FunctionSpec) =>
+				this.printFunction(methodSpec, methodSpec == spec.construct ? 'new' : '.' + methodSpec.name, 1)
+			).then(flatten).then((output: string[]) =>
+				output.length == 0 ? output : [
+					'>  ',
+					'> Methods:  '
+				].concat(output)
+			),
 
-		for(var propertySpec of propertyList) {
-			propertyOutput.push(this.printProperty(propertySpec, '.' + propertySpec.name));
-		}
-
-		if(methodOutput.length) {
-			output.push('>  ');
-			output.push('> Methods:  ');
-			output = output.concat.apply(output, methodOutput);
-		}
-
-		if(propertyOutput.length) {
-			output.push('>  ');
-			output.push('> Properties:  ');
-			output = output.concat.apply(output, propertyOutput);
-		}
-
-		return(output);
+			Promise.map(spec.propertyList || [], (propertySpec: readts.IdentifierSpec) =>
+				this.printProperty(propertySpec, '.' + propertySpec.name)
+			).then(flatten).then((output: string[]) =>
+				output.length == 0 ? output : [
+					'>  ',
+					'> Properties:  '
+				].concat(output)
+			),
+		]).then(flatten));
 	}
 
 	private init() {
@@ -184,9 +176,11 @@ this.git.isDirty('package.json').then((dirty: boolean) => console.log(dirty));
 					Promise.map(moduleSpec.interfaceList, (interfaceSpec: readts.ClassSpec) =>
 						isIgnored(interfaceSpec) ? null : this.printClass(interfaceSpec, 'Interface')
 					),
+
 					Promise.map(moduleSpec.classList, (classSpec: readts.ClassSpec) =>
 						isIgnored(classSpec) ? null : this.printClass(classSpec, 'Class')
 					),
+
 					Promise.map(moduleSpec.functionList, (functionSpec: readts.FunctionSpec) =>
 						this.printFunction(functionSpec, functionSpec.name, 0)
 					)
@@ -208,7 +202,11 @@ this.git.isDirty('package.json').then((dirty: boolean) => console.log(dirty));
 			this.init().then(() =>
 				this.generate(parser.parse(config, (pathName: string) => pathName == this.dtsPath, '.d.ts'))
 			).then((output: string[]) =>
-				['Docs generated using [`docts`](https://github.com/charto/docts)'].concat(output, [''])
+				flatten([
+					['Docs generated using [`docts`](https://github.com/charto/docts)'],
+					output,
+					['']
+				])
 			)
 		);
 	}

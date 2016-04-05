@@ -50,12 +50,12 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-DocBuilder"></a>
 > ### Class [`DocBuilder`](#api-DocBuilder)
 > <em>TypeScript project Markdown documentation builder.</em>  
-> Source code: [`<>`](#L30)  
+> Source code: [`<>`](#L34)  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](#L31)  
+> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](#L35)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > **.build( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](#L201)  
+> > **.build( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](#L195)  
 > > &emsp;<em>Generate API documentation for the package.</em>  
 > > &emsp;<em>Returns promise resolving to an array of text split by line breaks.</em>  
 >
@@ -80,9 +80,6 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > ### Class [`Section`](#api-Section)
 > <em>Represents a section in a Markdown file.</em>  
 > Source code: [`<>`](#L9)  
->  
-> Methods:  
-> > **new( )** <sup>&rArr; <code>[Section](#api-Section)</code></sup>  
 >  
 > Properties:  
 > > **.header** <sup><code>string[]</code></sup>  
