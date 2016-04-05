@@ -5,11 +5,12 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as readts from 'readts';
 
-import {Git, CommitInfo} from 'ts-git';
+import {Git, CommitInfo, HeadInfo} from 'ts-git';
 
 interface SourceInfo {
-	dirty: boolean;
-	hash: string;
+	dirty?: boolean;
+	hash?: string;
+	shortHash?: string;
 }
 
 var hooks: readts.FormatHooks = {
@@ -33,17 +34,72 @@ function isIgnored(spec: readts.ClassSpec | readts.SignatureSpec | readts.Identi
 
 export class DocBuilder {
 	constructor(basePath: string) {
+		this.basePath = basePath;
 		var packagePath = path.resolve(basePath, 'package.json');
 		this.tsconfigPath = path.resolve(basePath, 'tsconfig.json');
 		var pkgJson = require(packagePath);
 		this.dtsPath = path.resolve(basePath, pkgJson.typings);
 
-		this.git = new Git(basePath);
+		var gitUrl = pkgJson.repository && pkgJson.repository.url;
+
+		if(gitUrl) {
+			var match = gitUrl.match(/^[+a-z]+:\/\/(github.com\/.+)\.git$/);
+
+			if(match) {
+				this.gitRepo = match[1];
+				this.git = new Git(basePath);
+			}
+		}
+	}
+
+	private getSource(pathName: string) {
+		var source = this.sourceTbl[pathName];
+
+		if(!source) {
+			var info: SourceInfo = {};
+
+			source = this.git.isDirty(pathName).then((dirty: boolean) => {
+				info.dirty = dirty;
+
+				if(dirty) return(null);
+
+				return(this.git.getLog(this.gitHead, {
+					path: pathName,
+					count: 1
+				}));
+			}).then((commitList: CommitInfo[]) => {
+				if(commitList && commitList.length) {
+					var hash = commitList[0].hash;
+
+					info.hash = hash;
+					info.shortHash = hash.substr(0, 7);
+				}
+
+				return(info);
+			});
+
+			this.sourceTbl[pathName] = source;
+		}
+
+		return(source);
 	}
 
 	private formatPos(pos: readts.SourcePos) {
 		if(!pos) return(Promise.resolve(''));
-		return(Promise.resolve(' [`<>`](#L' + pos.firstLine + ')'));
+
+		return(this.getSource(pos.sourcePath).then((source: SourceInfo) => {
+			var url = [
+				this.gitRepo,
+				'blob',
+				source.shortHash || this.gitBranch,
+				path.relative(this.basePath, pos.sourcePath)
+			].join('/');
+
+			var urlHash = '#L' + pos.firstLine;
+			if(pos.lastLine != pos.firstLine) urlHash += '-L' + pos.lastLine;
+
+			return(' [`<>`](http://' + url + urlHash + ')');
+		}));
 	}
 
 	private printTitle(name: string, typePrefix: string, doc: string, pos: readts.SourcePos) {
@@ -151,9 +207,10 @@ export class DocBuilder {
 	private init() {
 		if(this.git) {
 			return(
-				this.git.getWorkingHead().then((hash: string) =>
-					this.gitHead = hash
-				).catch((err: any) => true)
+				this.git.getWorkingHead().then((head: HeadInfo) => {
+					this.gitHead = head.hash;
+					this.gitBranch = head.branch;
+				}).catch((err: any) => true)
 			);
 		}
 
@@ -161,15 +218,6 @@ export class DocBuilder {
 	}
 
 	private generate(tree: readts.ModuleSpec[]) {
-		this.git.getLog(this.gitHead, {
-			path: 'package.json',
-			count: 1
-		}).then((log: CommitInfo[]) => {
-			if(log) console.log(log[0].hash.substr(0, 7));
-this.git.isDirty('package.json').then((dirty: boolean) => console.log(dirty));
-//			console.log(log.map((entry: LogEntry) => new Date(entry.author.date.seconds * 1000).toISOString()));
-		});
-
 		return(
 			Promise.map(tree, (moduleSpec: readts.ModuleSpec) =>
 				Promise.map([
@@ -211,13 +259,16 @@ this.git.isDirty('package.json').then((dirty: boolean) => console.log(dirty));
 		);
 	}
 
-	private sourceTbl: { [path: string]: SourceInfo } = {};
+	private sourceTbl: { [path: string]: Promise<SourceInfo> } = {};
 
+	private basePath: string;
 	/** Path to tsconfig.json. */
 	private tsconfigPath: string;
 	/** Path to main .d.ts exports file. */
 	private dtsPath: string;
 
 	private git: Git;
+	private gitRepo: string;
 	private gitHead: string;
+	private gitBranch: string;
 }
