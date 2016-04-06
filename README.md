@@ -50,12 +50,12 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-DocBuilder"></a>
 > ### Class [`DocBuilder`](#api-DocBuilder)
 > <em>TypeScript project Markdown documentation builder.</em>  
-> Source code: [`<>`](http://github.com/charto/docts/blob/develop/src/DocBuilder.ts#L35-L274)  
+> Source code: [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L35-L274)  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](http://github.com/charto/docts/blob/develop/src/DocBuilder.ts#L36-L53)  
+> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L36-L53)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > **.build( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](http://github.com/charto/docts/blob/develop/src/DocBuilder.ts#L243-L260)  
+> > **.build( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L243-L260)  
 > > &emsp;<em>Generate API documentation for the package.</em>  
 > > &emsp;<em>Returns promise resolving to an array of text split by line breaks.</em>  
 >
