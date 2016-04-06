@@ -14,13 +14,19 @@ interface SourceInfo {
 }
 
 var hooks: readts.FormatHooks = {
-	ref: (spec: readts.TypeSpec, hooks: readts.FormatHooks) => {
+	ref: (spec: readts.TypeSpec) => {
 		var ref = spec.ref;
 
 		if(ref.class) return('[' + ref.class.name + '](#api-' + ref.class.name + ')');
 		else return(ref.name);
 	}
 };
+
+var entityTbl = {
+	'<': '&lt;',
+	'>': '&gt;',
+	'&': '&amp;'
+}
 
 function flatten(listList: string[][]) {
 	return(Array.prototype.concat.apply([], listList));
@@ -102,6 +108,10 @@ export class DocBuilder {
 		}));
 	}
 
+	private formatType(type: readts.TypeSpec) {
+		return(type.format(hooks).replace(/[<>&]/g, (char: string) => entityTbl[char]));
+	}
+
 	private printTitle(name: string, typePrefix: string, doc: string, pos: readts.SourcePos) {
 		return(this.formatPos(pos).then((posLink: string) => {
 			var output = [
@@ -129,7 +139,7 @@ export class DocBuilder {
 			Promise.map(spec.signatureList, (signatureSpec: readts.SignatureSpec, index: number) =>
 				isIgnored(signatureSpec) ? [] : this.formatPos(signatureSpec.pos).then((posLink: string) => {
 					var output = [
-						'> > **' + name + '( )** <sup>&rArr; <code>' + signatureSpec.returnType.format(hooks) + '</code></sup>' + posLink + '  '
+						'> > **' + name + '( )** <sup>&rArr; <code>' + this.formatType(signatureSpec.returnType) + '</code></sup>' + posLink + '  '
 					];
 					var prefix: string;
 
@@ -145,7 +155,7 @@ export class DocBuilder {
 
 						var doc = paramSpec.doc ? ' <em>' + paramSpec.doc + '</em>' : '';
 
-						output.push(prefix + ' <sup><code>' + paramSpec.type.format(hooks) + '</code></sup>' + doc + '  ');
+						output.push(prefix + ' <sup><code>' + this.formatType(paramSpec.type) + '</code></sup>' + doc + '  ');
 					}
 
 					return(output);
@@ -163,7 +173,7 @@ export class DocBuilder {
 		if(spec.optional) prefix = '> > **' + name + '**<sub>?</sub>';
 		else prefix = '> > **' + name + '**';
 
-		output.push(prefix + ' <sup><code>' + spec.type.format(hooks) + '</code></sup>  ');
+		output.push(prefix + ' <sup><code>' + this.formatType(spec.type) + '</code></sup>  ');
 
 		if(spec.doc) {
 			for(var line of spec.doc.split(/\r?\n/)) {
