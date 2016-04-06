@@ -22,7 +22,7 @@ var hooks: readts.FormatHooks = {
 	}
 };
 
-var entityTbl = {
+var entityTbl: { [char: string]: string } = {
 	'<': '&lt;',
 	'>': '&gt;',
 	'&': '&amp;'

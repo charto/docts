@@ -5,6 +5,6 @@
     "bluebird": "registry:npm/bluebird#3.2.1+20160211005852"
   },
   "ambientDependencies": {
-    "node": "registry:dt/node#4.0.0+20160317120654"
+    "node": "registry:dt/node#4.0.0+20160330064709"
   }
 }
