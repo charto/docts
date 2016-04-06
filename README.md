@@ -2,6 +2,7 @@ docts
 =====
 
 [![build status](https://travis-ci.org/charto/docts.svg?branch=master)](http://travis-ci.org/charto/docts)
+[![dependency status](https://david-dm.org/charto/docts.svg)](https://david-dm.org/charto/docts)
 [![npm version](https://img.shields.io/npm/v/docts.svg)](https://www.npmjs.com/package/docts)
 
 This is a command-line tool to generate API documentation for TypeScript projects
