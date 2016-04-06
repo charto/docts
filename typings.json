@@ -2,9 +2,9 @@
   "name": "docts",
   "version": false,
   "dependencies": {
-    "bluebird": "registry:npm/bluebird#3.2.1+20160211005852"
+    "bluebird": "registry:npm/bluebird#3.3.4+20160515010139"
   },
   "ambientDependencies": {
-    "node": "registry:dt/node#4.0.0+20160330064709"
+    "node": "registry:dt/node#4.0.0+20160509154515"
   }
 }
