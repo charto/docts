@@ -51,12 +51,12 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-DocBuilder"></a>
 > ### Class [`DocBuilder`](#api-DocBuilder)
 > <em>TypeScript project Markdown documentation builder.</em>  
-> Source code: [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L35-L274)  
+> Source code: [`<>`](http://github.com/charto/docts/blob/db09800/src/DocBuilder.ts#L41-L284)  
 >  
 > Methods:  
-> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L36-L53)  
+> > **new( )** <sup>&rArr; <code>[DocBuilder](#api-DocBuilder)</code></sup> [`<>`](http://github.com/charto/docts/blob/db09800/src/DocBuilder.ts#L42-L59)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > **.build( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](http://github.com/charto/docts/blob/a103a65/src/DocBuilder.ts#L243-L260)  
+> > **.build( )** <sup>&rArr; <code>Promise&lt;any&gt;</code></sup> [`<>`](http://github.com/charto/docts/blob/db09800/src/DocBuilder.ts#L253-L270)  
 > > &emsp;<em>Generate API documentation for the package.</em>  
 > > &emsp;<em>Returns promise resolving to an array of text split by line breaks.</em>  
 >
@@ -70,7 +70,7 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > > &emsp;&#x25aa; markdownPath <sup><code>string</code></sup>  
 > > **.readSections( )** <sup>&rArr; <code>[Section](#api-Section)[]</code></sup> [`<>`](http://github.com/charto/docts/blob/1c6326e/src/Markdown.ts#L28-L67)  
 > > &emsp;<em>Read the file and split each heading into a separate section.</em>  
-> > **.writeSections( )** <sup>&rArr; <code>Promise</code></sup> [`<>`](http://github.com/charto/docts/blob/1c6326e/src/Markdown.ts#L71-L79)  
+> > **.writeSections( )** <sup>&rArr; <code>Promise&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/docts/blob/1c6326e/src/Markdown.ts#L71-L79)  
 > > &emsp;<em>Replace file contents with a new list of sections.</em>  
 > > &emsp;&#x25aa; sectionList <sup><code>[Section](#api-Section)[]</code></sup>  
 >  
