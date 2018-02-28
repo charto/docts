@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"declaration": true,
 		"experimentalDecorators": true,
+		"lib": [ "es5", "es2015.collection" ],
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
@@ -10,9 +11,7 @@
 		"target": "es5"
 	},
 	"files": [
-		"typings/main.d.ts",
-
-		"src/docts.ts",
+		"src/index.ts",
 		"src/cli.ts"
 	]
 }
