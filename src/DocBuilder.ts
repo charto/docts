@@ -44,7 +44,11 @@ export class DocBuilder {
 		var packagePath = path.resolve(basePath, 'package.json');
 		this.tsconfigPath = path.resolve(basePath, 'tsconfig.json');
 		var pkgJson = require(packagePath);
-		this.dtsPath = path.resolve(basePath, pkgJson.typings);
+		var typings = pkgJson.typings ? pkgJson.typings : pkgJson.types;
+		if (!typings) {
+			throw new Error('Expected either a "typings" or "types" field in package.json');
+		}
+		this.dtsPath = path.resolve(basePath, typings);
 
 		var gitUrl = pkgJson.repository && pkgJson.repository.url;
 
