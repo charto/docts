@@ -1,6 +1,6 @@
 {
   "name": "docts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "README.md API section autogenerator for TypeScript projects",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -24,13 +24,13 @@
   },
   "homepage": "https://github.com/charto/docts#readme",
   "dependencies": {
-    "bluebird": "^3.5.1",
+    "bluebird": "^3.5.2",
     "readts": "~0.2.0",
     "ts-git": "~0.1.0"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.5.20",
-    "@types/node": "^8.9.4",
-    "typescript": "^2.7.2"
+    "@types/bluebird": "^3.5.24",
+    "@types/node": "^10.9.4",
+    "typescript": "^3.0.3"
   }
 }
