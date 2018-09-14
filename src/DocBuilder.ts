@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as readts from 'readts';
 
-import {Git, CommitInfo, HeadInfo} from 'ts-git';
+import { Git, CommitInfo, HeadInfo } from 'ts-git';
 
 interface SourceInfo {
 	dirty?: boolean;
@@ -39,10 +39,13 @@ function isIgnored(spec: readts.ClassSpec | readts.SignatureSpec | readts.Identi
 /** TypeScript project Markdown documentation builder. */
 
 export class DocBuilder {
-	constructor(basePath: string) {
-		this.basePath = basePath;
+
+	/** @param tsconfigPath Path to tsconfig.json. */
+	constructor(
+		private basePath: string,
+		private tsconfigPath = path.resolve(basePath, 'tsconfig.json')
+	) {
 		var packagePath = path.resolve(basePath, 'package.json');
-		this.tsconfigPath = path.resolve(basePath, 'tsconfig.json');
 		var pkgJson = require(packagePath);
 		var typings = pkgJson.typings ? pkgJson.typings : pkgJson.types;
 		if (!typings) {
@@ -256,7 +259,7 @@ export class DocBuilder {
 
 	build() {
 		var parser = new readts.Parser();
-		var config = parser.parseConfig(this.tsconfigPath);
+		var config = parser.parseConfig(this.tsconfigPath!);
 
 		config.options.noEmit = true;
 
@@ -275,9 +278,6 @@ export class DocBuilder {
 
 	private sourceTbl: { [path: string]: Promise<SourceInfo> } = {};
 
-	private basePath: string;
-	/** Path to tsconfig.json. */
-	private tsconfigPath: string;
 	/** Path to main .d.ts exports file. */
 	private dtsPath: string;
 
@@ -285,4 +285,5 @@ export class DocBuilder {
 	private gitRepo: string;
 	private gitHead: string;
 	private gitBranch: string;
+
 }

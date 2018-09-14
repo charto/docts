@@ -1,6 +1,6 @@
 {
   "name": "docts",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "README.md API section autogenerator for TypeScript projects",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -9,9 +9,9 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "docts": "node bin/docts",
-    "prepublish": "tsc",
-    "test": "npm link docts && docts --help"
+    "docts": "node bin/docts . src/tsconfig.json",
+    "prepublish": "tsc -p src",
+    "test": "node bin/docts . src/tsconfig.json"
   },
   "author": "Juha Järvi",
   "license": "MIT",
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/charto/docts#readme",
   "dependencies": {
     "bluebird": "^3.5.2",
-    "readts": "~0.2.0",
+    "readts": "~0.3.0",
     "ts-git": "~0.1.0"
   },
   "devDependencies": {

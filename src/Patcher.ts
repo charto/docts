@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 
-import {Section, Markdown} from './Markdown';
-import {DocBuilder} from './DocBuilder';
+import { Section, Markdown } from './Markdown';
+import { DocBuilder } from './DocBuilder';
 
 /** Patch section titled API of README.md file in given directory. */
 
-export function patchReadme(basePath: string) {
+export function patchReadme(basePath: string, tsconfigPath?: string) {
 	var markdown = new Markdown(path.resolve(basePath, 'README.md'));
 
 	var sectionList = markdown.readSections();
@@ -19,7 +19,7 @@ export function patchReadme(basePath: string) {
 	var apiSection = sectionTbl['api'];
 
 	if(apiSection) {
-		new DocBuilder(basePath).build().then((content: string[]) => {
+		new DocBuilder(basePath, tsconfigPath).build().then((content: string[]) => {
 			apiSection.content = content;
 			return(markdown.writeSections(sectionList));
 		});
