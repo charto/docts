@@ -102,7 +102,7 @@ export class DocBuilder {
 				this.gitRepo,
 				'blob',
 				source.shortHash || this.gitBranch,
-				path.relative(this.basePath, pos.sourcePath)
+				path.relative(this.basePath, pos.sourcePath).replace(/\\/g, "/")
 			].join('/');
 
 			var urlHash = '#L' + pos.firstLine;
